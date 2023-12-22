@@ -11,11 +11,11 @@ const Header = () => {
             <span className="text-state-700">Estate</span>
           </h1>
         </Link>
-        <from className=" bg-slate-100 p-3 rounded-lg">
+        <from className=" bg-slate-100 p-3 rounded-lg flex items-center">
           <input
             type="text"
             placeholder="Search..."
-            className="bg-transparent"
+            className="bg-transparent focus:outline-none w-4 sm:w-64"
           />
           <FaSearch className="text-slate-600" />
         </from>
