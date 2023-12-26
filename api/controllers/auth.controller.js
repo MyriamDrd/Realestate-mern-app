@@ -1,7 +1,8 @@
 import User from "../models/user.model.js";
 import bcryptjs from "bcryptjs";
+import { errorHandler } from "../utils/error.js";
 
-export const signup = async (req, res) => {
+export const signup = async (req, res, next) => {
   const { username, email, password } = req.body;
   const hachedPassword = bcryptjs.hashSync(password, 10);
   const newUser = new User({ username, email, password: hachedPassword });
@@ -9,6 +10,6 @@ export const signup = async (req, res) => {
     await newUser.save();
     res.status(201).json("User created successfuly");
   } catch (error) {
-    res.status(500).json({ message: "username or email already exist" });
+    next(errorHandler(500, "Help"));
   }
 };
