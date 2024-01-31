@@ -114,7 +114,7 @@ const CreateListing = () => {
     ) {
       setFormData({
         ...formData,
-        [e.type.id]: e.target.checked,
+        [e.target.id]: e.target.checked,
       });
     }
     if (
@@ -124,7 +124,7 @@ const CreateListing = () => {
     ) {
       setFormData({
         ...formData,
-        [e.type.id]: e.target.value,
+        [e.target.id]: e.target.value,
       });
     }
   };
