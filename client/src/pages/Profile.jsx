@@ -3,6 +3,7 @@ import { useEffect, useRef } from 'react';
 import { useState } from 'react';
 import { Link } from "react-router-dom";
 import { useSelector, useDispatch } from 'react-redux';
+
 import { 
     updateUserStart, 
     updateUserSuccess, 
@@ -14,8 +15,11 @@ import {
     signOutUserFailure,
     signOutUserSuccess
 } from '../redux/user/userSlice';
+
+
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from 'firebase/storage';
 import { app } from '../firebase';
+
 const Profile = () => {
     const fileRef = useRef(null);
     const { currentUser, loading, error } = useSelector((state) => state.user);
@@ -27,16 +31,20 @@ const Profile = () => {
     const [showListingsError, setShowListingsError] = useState(false);
     const [userListings, setUserListings] = useState([])
     const dispatch = useDispatch();
+
     // console.log(formData);
+
     // allow read;
     // allow write: if 
     // request.resource.size < 2 * 1024 * 1024 && 
     // request.resource.contentType.matches('image/.*')
+
     useEffect(() => {
         if (file) {
             handleFileUpload(file);
         }
     }, [file]);
+
     const handleFileUpload = (file) => {
         const storage = getStorage(app);
         const fileName = new Date().getTime() + file.name;
@@ -60,11 +68,14 @@ const Profile = () => {
           }
         );
     };
+
     const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
     }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         try {
             dispatch(updateUserStart());
             const res = await fetch(`/api/user/update/${currentUser._id}`,{
@@ -74,56 +85,70 @@ const Profile = () => {
                 },
                 body: JSON.stringify(formData),
             });
+
             const data = await res.json();
+
             if (data.success === false) {
                 dispatch(updateUserFailure(data.message));
                 return;
             }
+
             dispatch(updateUserSuccess(data));
             setUpdateSuccess(true);
         } catch (error) {
             dispatch(updateUserFailure(error.message));
         }
     }
+
     const handleDeleteUser = async () => {
         try {
             dispatch(deleteUserStart());
+
             const res = await fetch(`/api/user/delete/${currentUser._id}`, {
                 method: 'DELETE'
             });
+
             const data = await res.json();
+
             if (data.success === false) {
                 dispatch(deleteUserFailure(data.message));
                 return;
             }
+
             dispatch(deleteUserSuccess(data))
         } catch (error) {
             dispatch(deleteUserFailure(error.message))
         }
     }
+
     const handleSignOut = async () => {
         try {
             dispatch(signOutUserStart())
             const res = await fetch('/api/auth/signout');
             const data = await res.json();
+
             if (data.success === false) {
                 dispatch(signOutUserFailure(data.message))
                 return;
             }
+
             dispatch(signOutUserSuccess(data))
         } catch (error) {
             dispatch(signOutUserFailure(error.message))
         }
     }
+
     const handleShowListings = async () => {
         try {
             setShowListingsError(false);
             const res = await fetch(`/api/user/listings/${currentUser._id}`);
             const data = await res.json();
+
             if (data.success === false) {
                 setShowListingsError(true);
                 return;
             }
+
             setUserListings(data)
         } catch (error) {
             setShowListingsError(true);
@@ -137,7 +162,7 @@ const Profile = () => {
             });
 
             const data = await res.json();
-
+            
             if (data.success === false) {
                 console.log(data.message);
                 return;
@@ -242,6 +267,7 @@ const Profile = () => {
             <p className='text-green-700 mt-5 text-center'>{updateSuccess ? 'Profile updated successfully' : ''}</p>
             <button onClick={handleShowListings} className='text-green-700 w-full'>Show Listings</button>
             <p className='text-red-700 mt-5 text-center'>{showListingsError ? 'Error showing listings' : ''}</p>
+
             {userListings && userListings.length > 0 && 
                 <div className='flex flex-col gap-4'>
                     <h1 className='text-center mt-7 text-2xl font-semibold'>Your Listings</h1>
@@ -255,9 +281,10 @@ const Profile = () => {
                             </Link>
 
                             <div className='flex flex-col items-center'>
-                                
                                 <button onClick={() => handleListingDelete(listing._id)} className='text-red-700 uppercase'>Delete</button>
-                                <button className='text-green-700 uppercase'>Edit</button>
+                                <Link to={`/update-listing/${listing._id}`}>
+                                    <button className='text-green-700 uppercase'>Edit</button>
+                                </Link>
                             </div>
                         </div>
                     ))}
@@ -266,4 +293,5 @@ const Profile = () => {
         </div>
     );
 };
+
 export default Profile;
