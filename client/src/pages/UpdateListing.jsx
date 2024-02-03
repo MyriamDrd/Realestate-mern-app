@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from "firebase/storage";
 import { app } from "../firebase";
 import { useSelector } from 'react-redux';
 import { useNavigate, useParams } from "react-router-dom";
+
 const UpdateListing = () => {
     const { currentUser } = useSelector((state) => state.user);
     const [files, setFiles] = useState([]);
@@ -10,8 +12,10 @@ const UpdateListing = () => {
     const [imageUploadError, setImageUploadError] = useState(false);
     const [error, setError] = useState(false);
     const [loading, setLoading] = useState(false);
+
     const navigate = useNavigate();
     const params = useParams();
+
     const [formData, setFormData] = useState({
         imageUrls: [],
         name: '',
@@ -26,28 +30,34 @@ const UpdateListing = () => {
         parking: false,
         furnished: false,
     });
+
     useEffect(() => {
       const fetchListing = async () => {
         const listingId = params.listingId;
         const res = await fetch(`/api/listing/get/${listingId}`);
         const data = await res.json();
+
         if (data.success === false) {
           console.log(data.message);
           return;
         }
+
         setFormData(data);
       }
       fetchListing();
     }, [params.listingId])
-    
+
+
     const handleImageSubmit = (e) => {
         if (files.length > 0 && files.length + formData.imageUrls < 7) {
             setUploading(true);
             setImageUploadError(false);
             const promises = [];
+
             for (let i = 0; i < files.length; i++) {
                 promises.push(storeImage(files[i]))
             }
+
             Promise.all(promises).then((urls) => {
                 setFormData({ 
                     ...formData, 
@@ -64,6 +74,7 @@ const UpdateListing = () => {
             setUploading(false);
         }
     }
+
     const storeImage = async (file) => {
         return new Promise((resolve, reject) => {
             const storage = getStorage(app);
@@ -88,12 +99,14 @@ const UpdateListing = () => {
             );
         });
     };
+
     const handleRemoveImage = (index) => {
         setFormData({
             ...formData,
             imageUrls: formData.imageUrls.filter((_, i) =>  i !== index),
         })
     }
+
     const handleChange = (e) => {
         if (e.target.id === 'sale' || e.target.id === 'rent') {
             setFormData({
@@ -101,12 +114,14 @@ const UpdateListing = () => {
                 type: e.target.id
             })
         }
+
         if (e.target.id === 'parking' || e.target.id === 'furnished' || e.target.id == 'offer') {
             setFormData({
                 ...formData,
                 [e.target.id]: e.target.checked
             })
         }
+
         if (e.target.type === 'number' || e.target.type === 'text' || e.target.type === 'textarea') {
             setFormData({
                 ...formData,
@@ -114,6 +129,7 @@ const UpdateListing = () => {
             })
         }
     }
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -123,8 +139,7 @@ const UpdateListing = () => {
             return setError('Discount price must be lower than regular price');
           setLoading(true);
           setError(false);
-         
-          const res = await fetch(`/api/listing/update/${params.listingId}`, {
+          const res = await fetch('/api/listing/create', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -145,6 +160,7 @@ const UpdateListing = () => {
           setLoading(false);
         }
       };
+
     return (
         <main className="p-3 max-w-4xl mx-auto">
             <h1 className="text-3xl font-semibold text-center my-7">
@@ -313,5 +329,5 @@ const UpdateListing = () => {
         </main>
     );
 }
- 
+
 export default UpdateListing;
